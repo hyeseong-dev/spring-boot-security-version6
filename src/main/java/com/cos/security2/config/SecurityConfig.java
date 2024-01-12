@@ -7,6 +7,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity // 스프링 시큐리티 필터가 스프링 필터체인에 등록이 됩니다.
@@ -29,8 +30,15 @@ public class SecurityConfig  {
                         .anyRequest().permitAll())
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .permitAll()
-                )
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/")
+                        .permitAll())
+                .logout(logout -> logout
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET")) // GET 요청으로 로그아웃 처리
+                        .logoutSuccessUrl("/") // 로그아웃 성공 후 리다이렉트할 URL
+                        .invalidateHttpSession(true) // 세션 무효화
+                        .deleteCookies("JSESSIONID") // 쿠키 삭제
+                        .permitAll())
                 ;
         return http.build();
 

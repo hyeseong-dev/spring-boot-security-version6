@@ -47,16 +47,14 @@ public class IndexController {
 
     //   스프링 시큐리티 해당 주소를 낚아챔!! 하지만 SecurityConfig 모듈 명세 이후 정상 출력됨.
     @GetMapping("/loginForm")
-    public String loginForm(){
+    public String loginForm(Model model, HttpServletRequest request){
+        setCsrfThenGiveToView(model, request);
         return "loginForm";
     }
 
     @GetMapping("/joinForm")
     public String joinForm(Model model, HttpServletRequest request) {
-        CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
-        if (csrfToken != null) {
-            model.addAttribute("_csrf", csrfToken);
-        }
+        setCsrfThenGiveToView(model, request);
         return "joinForm";
     }
 
@@ -77,5 +75,12 @@ public class IndexController {
     @GetMapping("/joinProc")
     public @ResponseBody String joinProc(){
         return "회원가입 완료됨";
+    }
+
+    private static void setCsrfThenGiveToView(Model model, HttpServletRequest request) {
+        CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+        if (csrfToken != null) {
+            model.addAttribute("_csrf", csrfToken);
+        }
     }
 }
