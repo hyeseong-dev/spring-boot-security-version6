@@ -4,6 +4,7 @@ import com.cos.security2.model.User;
 import com.cos.security2.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
@@ -83,4 +84,12 @@ public class IndexController {
             model.addAttribute("_csrf", csrfToken);
         }
     }
+
+    @Secured("ROLE_ADMIN")
+    @GetMapping("/info")
+    public @ResponseBody String info(){
+        return "개인정보";
+    }
+
+
 }
