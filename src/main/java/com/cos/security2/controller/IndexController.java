@@ -1,10 +1,12 @@
 package com.cos.security2.controller;
 
+import com.cos.security2.config.auth.PrincipalDetails;
 import com.cos.security2.model.User;
 import com.cos.security2.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
@@ -32,7 +34,8 @@ public class IndexController {
     }
 
     @GetMapping("/user")
-    public @ResponseBody String user(){
+    public @ResponseBody String user(@AuthenticationPrincipal PrincipalDetails principalDetails){
+        System.out.println("principalDetails : " + principalDetails.getUser());
         return "user";
     }
 

@@ -1,6 +1,10 @@
 package com.cos.security2.config.oauth;
 
 import com.cos.security2.config.auth.PrincipalDetails;
+import com.cos.security2.config.auth.userinfo.GoogleUserInfo;
+import com.cos.security2.config.auth.userinfo.KakaoUserInfo;
+import com.cos.security2.config.auth.userinfo.NaverUserInfo;
+import com.cos.security2.config.auth.userinfo.OAuth2UserInfo;
 import com.cos.security2.model.User;
 import com.cos.security2.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +27,14 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest){
         //accessToken으로 서드파티에 요청하여 사용자 정보를 얻어옴
+        OAuth2UserInfo oAuth2UserInfo = null;
 
         System.out.println("getClientRegistration : " + userRequest.getClientRegistration().getRegistrationId());
         System.out.println("getAccessToken: " + userRequest.getAccessToken().getTokenValue());
 
         // 구글로그인 버튼 클릭 -> 구글 로그인 창 -> 로그인을 완료 -> 코드를 리턴(OAuth - Client라이브러리) -> AccessToken 요청
         // userRequest 정보 -> loadUser함수 호출 -> 구글로부터 회원프로필 받아준다.
+
 
         OAuth2User oAuth2User = super.loadUser(userRequest);
         System.out.println("getAttributes: " + oAuth2User.getAttributes());
@@ -40,31 +46,26 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
         String name = null;
 
         if ("google".equals(provider)){
-            providerId = oAuth2User.getAttribute("sub");
-            email = oAuth2User.getAttribute("email");
-            name = oAuth2User.getAttribute("name");
+            oAuth2UserInfo = new GoogleUserInfo(oAuth2User.getAttributes());
         } else if ("naver".equals(provider)){
-            Map<String, Object> response = oAuth2User.getAttribute("response");
-            providerId = (String) response.get("id");
-            email = (String) response.get("email");
-            name = (String) response.get("name");
+            oAuth2UserInfo = new NaverUserInfo(oAuth2User.getAttributes());
+        } else if ("kakao".equals(provider)){
+            oAuth2UserInfo = new KakaoUserInfo(oAuth2User.getAttributes());
+        }  else if (oAuth2UserInfo == null) {
+            System.out.println("oAuth2UserInfo is null for "+provider);
         }
 
 
-        String username = provider+ "_" + providerId; // google_109742856182916427686
-        String password = passwordEncoder.encode("임의의 비밀번호");
-        String role = "ROLL_USER";
-
-        User userEntity = userRepository.findByUsername(username);
+        User userEntity = userRepository.findByEmailAndProvider(oAuth2UserInfo.getEmail(), oAuth2UserInfo.getProvider());
         if (userEntity == null){
             System.out.println(provider + " 로그인이 최초입니다.");
             userEntity = User.builder()
-                    .username(username)
-                    .password(password)
-                    .email(email)
-                    .role(role)
-                    .provider(provider)
-                    .providerId(providerId)
+                    .username(oAuth2UserInfo.getName())
+                    .password(passwordEncoder.encode("임의의 비밀번호"))
+                    .email(oAuth2UserInfo.getEmail())
+                    .role("ROLL_USER")
+                    .provider(oAuth2UserInfo.getProvider())
+                    .providerId(oAuth2UserInfo.getProviderId())
                     .build();
             userRepository.save(userEntity);
         }else{
