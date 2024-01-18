@@ -77,3 +77,11 @@ logging:
     org:
       springframework:
         security: DEBUG
+
+# KAKAO LOGIN
+kakao:
+  client:
+    id: df14d13f783d392d0793bf1da3d27554
+    secret: XX9uj4dugP7lgs8zO5J0RQFhpHrrNJCO
+    redirect:
+      url: http://localhost:8081/kakao/callback

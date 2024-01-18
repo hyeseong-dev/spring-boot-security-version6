@@ -41,9 +41,6 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 
         // 공급자(Provider) 구분
         String provider = userRequest.getClientRegistration().getRegistrationId();
-        String providerId = null;
-        String email = null;
-        String name = null;
 
         if ("google".equals(provider)){
             oAuth2UserInfo = new GoogleUserInfo(oAuth2User.getAttributes());
@@ -71,7 +68,6 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
         }else{
             System.out.println(provider + " 로그인을 이미 한 적이 있습니다.");
         }
-
 
         // 회원 가입을 강제로 진행할 예정
         return new PrincipalDetails(userEntity, oAuth2User.getAttributes());

@@ -1,6 +1,7 @@
 package com.cos.security2.controller;
 
 import com.cos.security2.config.auth.PrincipalDetails;
+import com.cos.security2.config.oauth.OAuthService;
 import com.cos.security2.model.User;
 import com.cos.security2.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,10 +14,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class IndexController {
+
+    @Autowired
+    private OAuthService oAuthService;
 
     @Autowired
     private UserRepository userRepository;
@@ -31,6 +36,14 @@ public class IndexController {
         // 머스터쉬 기본폴더 경로 : src/main/resources/
         // 뷰 리졸버 설정 : templates(prefix), .mustache(suffix) 생략 가능.
         return "index"; // src/main/resources/templates/index.mustache
+    }
+
+
+    @GetMapping("/kakao/callback")
+    public String kakaoCallback(@RequestParam("code") String code) throws Exception{
+        String access_token = oAuthService.getKakaoAccessToken(code);
+        System.out.println("컨트롤러 액세스 토큰 : "+access_token);
+        return "redirect:/";
     }
 
     @GetMapping("/user")
